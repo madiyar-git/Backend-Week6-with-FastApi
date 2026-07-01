@@ -4,7 +4,8 @@ from fastapi import APIRouter, status,HTTPException
 from schemas.tasks import TaskCreate, TaskUpdate, TaskResponse
 
 router = APIRouter(
-  prefix="/tasks"
+  prefix="/tasks",
+  tags=["Tasks"]
   )
 
 DB = {

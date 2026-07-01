@@ -21,7 +21,7 @@ class TaskCreate(TaskBase):
   @field_validator("priority")
   @classmethod
   def validate_priority(cls, value: int) -> int:
-    if 1 >= value >= 5:
+    if not (5 >= value >= 1):
       raise ValueError("Priority must be between 1 and 5")
     return value
 
@@ -43,7 +43,7 @@ class TaskUpdate(TaskBase):
   @field_validator("priority")
   @classmethod
   def validate_priority( cls, value: Optional[int] ) -> Optional[int]:
-    if 1 >= value or value >= 5:
+    if not (1 >= value >= 5):
       raise ValueError("Priority must be between 1 and 5")
     return value
 
