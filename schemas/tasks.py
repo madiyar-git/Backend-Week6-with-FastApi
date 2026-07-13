@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated, Optional, Any
+from typing import Optional, Any
 
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 
@@ -15,7 +15,7 @@ class TaskBase(BaseModel):
 
   title: str = Field(default ="New task")
   description: str = Field(default=None )
-  priority: int = Field(default=1, ge=1, le= 3, description="Priority of task 1-5")
+  priority: int = Field(default=1, ge=1, le= 3, description="Priority of task 1-3")
 
   @field_validator("title")
   @classmethod
@@ -23,6 +23,8 @@ class TaskBase(BaseModel):
     striped_value = value.strip()
     if not striped_value:
       raise ValueError("Title can`t be empty")
+    elif len(striped_value) < 3:
+      raise ValueError("")
     return striped_value
 
   @field_validator("description")
@@ -35,17 +37,17 @@ class TaskBase(BaseModel):
 class TaskCreate(TaskBase):
   title: str
   description: str | None = None
-  priority: Any = Field(default="high")
+  priority: Any = Field(default="low")
 
   @field_validator("priority", mode="before")
   @classmethod
-  def coerce_priority( cls, v: Any ) -> int:
-    if isinstance(v, str):
-      v_lower = v.strip().lower()
-      if v_lower in PRIORITY_MAP:
-        return PRIORITY_MAP[v_lower]
-      if v.isdigit():
-        return int(v)
+  def coerce_priority( cls, priority: Any ) -> int:
+    if isinstance(priority, str):
+      priority_lower = priority.strip().lower()
+      if priority_lower in PRIORITY_MAP:
+        return PRIORITY_MAP[priority_lower]
+      if priority.isdigit():
+        return int(priority)
     return 1
 
 class TaskUpdate(TaskBase):

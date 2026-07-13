@@ -10,7 +10,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
   raise RuntimeError("Error with DB")
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL)
 
 AsyncSessionLocal = async_sessionmaker(bind=engine, expire_on_commit=False, class_=AsyncSession)
 
@@ -19,7 +19,4 @@ class Base(DeclarativeBase):
 
 async def get_db():
   async with AsyncSessionLocal() as session:
-    try:
-      yield session
-    finally:
-      await session.close()
+    yield session

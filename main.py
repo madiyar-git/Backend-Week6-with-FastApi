@@ -4,7 +4,6 @@ from core.db import engine, Base
 from routers.tasks import router as tasks_router
 from routers.auth import router as auth_router
 
-
 @asynccontextmanager
 async def lifespan( app: FastAPI ):
   async with engine.begin() as conn:
