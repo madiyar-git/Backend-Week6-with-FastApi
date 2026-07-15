@@ -1,9 +1,9 @@
 import os
 
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from typing import Annotated
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
@@ -24,7 +24,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", 7))
 if not SECRET_KEY:
   raise RuntimeError("Error: SECRET_KEY doesn`t have value")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token/")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token/")
 
 pwd_context = CryptContext(
     schemes=["bcrypt", "django_pbkdf2_sha256"],
@@ -47,13 +47,32 @@ def create_jwt_token( data: dict, expires_delta: timedelta ) -> str:
   return encoded_jwt
 
 @router.post("/token/", response_model=Token)
-async def login( login_data: LoginSchema,
+async def login(
+    request: Request,
     db: Annotated[AsyncSession, Depends(get_db)]):
+  content_type = request.headers.get("content-type", "")
 
-  result = await db.execute(select(UserModel).where(UserModel.username == login_data.username))
+  if "application/x-www-form-urlencoded" in content_type or "multipart/form-data" in content_type:
+    form_data = await request.form()
+    username = form_data.get("username")
+    password = form_data.get("password")
+  else:
+    try:
+      json_data = await request.json()
+      username = json_data.get("username")
+      password = json_data.get("password")
+    except Exception:
+      raise HTTPException(status_code=400, detail="Invalid JSON payload")
+
+  if not username or not password:
+    raise HTTPException(
+      status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Username and password are required"
+      )
+
+  result = await db.execute(select(UserModel).where(UserModel.username == username))
   user = result.scalar_one_or_none()
 
-  if not user or not verify_password(login_data.password, user.password):
+  if not user or not verify_password(password, user.password):
     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong username or password")
 
   access_token = create_jwt_token(data={"sub": str(user.id), "type": "access"},
@@ -62,7 +81,8 @@ async def login( login_data: LoginSchema,
   refresh_token = create_jwt_token(data={"sub": str(user.id), "type": "refresh"},
     expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
   return {
-    "access": access_token, "refresh": refresh_token
+    "access": access_token, "refresh": refresh_token,
+    "access_token": access_token, "token_type": "bearer"
     }
 
 @router.post("/token/refresh/", response_model= Token)
@@ -88,7 +108,7 @@ async def refresh_token(payload: RefreshTokenSchema,db:Annotated[AsyncSession, D
   new_refresh = create_jwt_token(
     data={"sub": str(user.id), "type": "refresh"}, expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS) )
 
-  return {"access": new_access, "refresh": new_refresh}
+  return {"access": new_access, "refresh": new_refresh, "access_token": new_access, "token_type": "bearer"}
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[AsyncSession, Depends(get_db)]) -> UserModel:

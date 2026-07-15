@@ -14,6 +14,8 @@ class LoginSchema(BaseModel):
 class Token(BaseModel):
   access: str
   refresh: str
+  access_token: str
+  token_type: str = "bearer"
 
 class RefreshTokenSchema(BaseModel):
   refresh: str
