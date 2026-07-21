@@ -27,6 +27,12 @@ async def get_tasks(current_user: Annotated[UserModel, Depends(get_current_user)
   result = await db.execute(select(TaskModel).where(TaskModel.owner_id == current_user.id))
   return result.scalars().all()
 
+# @router.get("/", response_model=List[TaskResponse], status_code=status.HTTP_200_OK)
+# async def search_input(task_name: str,
+#     db: Annotated[AsyncSession, Depends(get_current_user)]):
+#     result = await db.execute(select(TaskModel).where(TaskModel.title == task_name))
+#     return result.scalars().all()
+
 @router.get("/{task_id}/", response_model=TaskResponse, status_code=status.HTTP_200_OK)
 async def get_task(task_id: int, current_user: Annotated[UserModel, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)]):
