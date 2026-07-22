@@ -30,7 +30,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="ec04db03-c1b2-4939-89e5-c37a8f4eea72">
-      <console name="Connection" type="STANDARD" schema="public" session="Main"><![CDATA[select * from fastapi_users]]></console>
+      <console name="Connection" type="STANDARD" schema="public" session="Main"><![CDATA[select * from fastapi_tasks]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">

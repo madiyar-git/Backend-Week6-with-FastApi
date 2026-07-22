@@ -1,8 +1,6 @@
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
-
-import bcrypt
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
@@ -13,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.db import get_db
 from models.users import UserModel
 from schemas.auth import RefreshTokenSchema, Token, UserRegister
+from core.limiter import limiter
 
 load_dotenv()
 SECRET_KEY = os.getenv("SECRET_KEY")
@@ -48,6 +47,7 @@ def create_jwt_token( data: dict, expires_delta: timedelta ) -> str:
 router = APIRouter()
 
 @router.post("/token/", response_model=Token)
+@limiter.limit("5/minute")
 async def login(
     request: Request, db: Annotated[AsyncSession, Depends(get_db)], ):
   content_type = request.headers.get("content-type", "")
