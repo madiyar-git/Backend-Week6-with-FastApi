@@ -11,6 +11,7 @@ class LoginSchema(BaseModel):
     if isinstance(username, str):
       return username.strip()
     return username
+
 class Token(BaseModel):
   access: str
   refresh: str

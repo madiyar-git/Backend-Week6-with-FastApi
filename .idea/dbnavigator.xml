@@ -30,8 +30,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="ec04db03-c1b2-4939-89e5-c37a8f4eea72">
-      <console name="Connection" type="STANDARD" schema="public" session="Main"><![CDATA[select * from tasks_task
-where title = 'Demo']]></console>
+      <console name="Connection" type="STANDARD" schema="public" session="Main"><![CDATA[select * from fastapi_users]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
@@ -49,6 +48,8 @@ where title = 'Demo']]></console>
     <connection id="ec04db03-c1b2-4939-89e5-c37a8f4eea72" />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
+    <filter-actions connection-id="ec04db03-c1b2-4939-89e5-c37a8f4eea72" dataset="public.fastapi_users" active-filter-id="" />
+    <filter-actions connection-id="ec04db03-c1b2-4939-89e5-c37a8f4eea72" dataset="public.fastapi_tasks" active-filter-id="" />
     <filter-actions connection-id="ec04db03-c1b2-4939-89e5-c37a8f4eea72" dataset="public.auth_user" active-filter-id="" />
   </component>
   <component name="DBNavigator.Project.ExecutionManager">
