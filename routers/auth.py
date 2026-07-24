@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.db import get_db
 from models.users import UserModel
@@ -69,21 +69,30 @@ async def login(
       status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Username and password are required", )
 
   result = await db.execute(select(UserModel).where(UserModel.username == username))
+  result = await db.execute(text(f"SELECT id, username, password FROM fastapi_users WHERE username = '{username}'"))
   user = result.scalar_one_or_none()
-
   if not user or not verify_password(password, user.password):
     raise HTTPException(
       status_code=status.HTTP_401_UNAUTHORIZED, detail="Wrong username or password", )
 
-  access_token = create_jwt_token(
+  token_access = create_jwt_token(
     data={"sub": str(user.id), "type": "access"}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES), )
 
-  refresh_token = create_jwt_token(
+  token_refresh = create_jwt_token(
     data={"sub": str(user.id), "type": "refresh"}, expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS), )
 
   return {
-    "access": access_token, "refresh": refresh_token, "access_token": access_token, "token_type": "bearer",
+    "access": token_access, "refresh": token_refresh, "access_token": token_access, "token_type": "bearer",
     }
+
+# @router.post("/token/")
+# async def break_login(request: Request, db: Annotated[AsyncSession, Depends(get_db)]):
+#   json_data = await request.json()
+#   username = json_data.get("username")
+#   result = await db.execute(text(f"SELECT id, username, password FROM fastapi_users WHERE username = '{username}'"))
+#   user = result.mappings().all()
+#   return user
+
 
 @router.post("/token/refresh/", response_model=Token)
 async def refresh_token(

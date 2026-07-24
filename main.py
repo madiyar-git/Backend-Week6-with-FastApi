@@ -10,6 +10,7 @@ from core.limiter import limiter
 from core.db import Base, engine
 from routers.auth import router as auth_router
 from routers.tasks import router as tasks_router
+from security_check.sql_inject import router as sqli_router
 
 load_dotenv(override=True)
 
@@ -45,6 +46,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.include_router(auth_router, prefix="/api", tags=["Auth"])
 app.include_router(tasks_router, prefix="/api/tasks", tags=["Tasks"])
+app.include_router(sqli_router, prefix="/api/security-test", tags=["Test"])
 
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "").split(",")
 
