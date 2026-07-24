@@ -81,7 +81,7 @@ async def login(
     data={"sub": str(user.id), "type": "refresh"}, expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS), )
 
   return {
-    "access": token_access, "refresh": token_refresh, "access_token": token_access, "token_type": "bearer",
+    "access": token_access, "refresh": token_refresh, "access_token": token_access, "token_type": "bearer", # nosec B105
     }
 
 # @router.post("/token/")
@@ -102,7 +102,7 @@ async def refresh_token(
     decode_payload = jwt.decode(payload.refresh, SECRET_KEY, algorithms=[ALGORITHM])
     user_id: str = decode_payload.get("sub")
     token_type: str = decode_payload.get("type")
-    if user_id is None or token_type != "refresh":
+    if user_id is None or token_type != "refresh": # nosec B105
       raise credential_exception
   except JWTError:
     raise credential_exception
@@ -117,7 +117,7 @@ async def refresh_token(
     data={"sub": str(user.id), "type": "refresh"}, expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS), )
 
   return {
-    "access": new_access, "refresh": new_refresh, "access_token": new_access, "token_type": "bearer",
+    "access": new_access, "refresh": new_refresh, "access_token": new_access, "token_type": "bearer", # nosec B105
     }
 
 
@@ -129,7 +129,7 @@ async def get_current_user(
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     user_id: str = payload.get("sub")
     token_type: str = payload.get("type")
-    if user_id is None or token_type != "access":
+    if user_id is None or token_type != "access": # nosec B105
       raise credential_exception
   except JWTError:
     raise credential_exception
