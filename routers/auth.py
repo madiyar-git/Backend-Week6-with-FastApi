@@ -69,7 +69,6 @@ async def login(
       status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Username and password are required", )
 
   result = await db.execute(select(UserModel).where(UserModel.username == username))
-  result = await db.execute(text(f"SELECT id, username, password FROM fastapi_users WHERE username = '{username}'"))
   user = result.scalar_one_or_none()
   if not user or not verify_password(password, user.password):
     raise HTTPException(

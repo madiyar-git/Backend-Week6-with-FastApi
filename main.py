@@ -41,6 +41,21 @@ async def extract_username(request: Request, call_next):
   response = await call_next(request)
   return response
 
+@app.middleware("http")
+async def add_crs_headers(request: Request, call_next):
+  response = await call_next(request)
+
+  response.headers["Content-Security_Policy"] = (
+    "default-src 'self';"
+    "script-src 'self';"
+    "style-src 'self' 'unsafe-inline';"
+    "img-src 'self' data:;"
+  )
+
+  response.headers["X-Content_Type_Options"] = "nosniff"
+  response.headers["X-Frame-Options"] = "DENY"
+  return response
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
